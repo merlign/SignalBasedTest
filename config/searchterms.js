@@ -3,9 +3,6 @@
 /**
  * Search terms per sector. Add new sectors or terms here — the scraper
  * picks them up automatically on the next run.
- *
- * Removed: 'it' and 'backoffice' — these generate structurally wrong leads
- * for a B2B technical recruitment marketing agency.
  */
 
 const SEARCH_TERMS = {
@@ -61,6 +58,22 @@ const SEARCH_TERMS = {
     'kabellegger',
     'instrumentatiemonteur',
     'plc programmeur',
+  ],
+  it: [
+    'IT beheerder',
+    'systeembeheerder',
+    'netwerkbeheerder',
+    'helpdesk medewerker',
+    'technisch beheerder ict',
+    'ict medewerker',
+  ],
+  backoffice: [
+    'HR medewerker',
+    'office manager',
+    'management assistent',
+    'financieel administrateur',
+    'salarisadministrateur',
+    'administratief medewerker',
   ],
   spoorwegtechniek: [
     'railmonteur',

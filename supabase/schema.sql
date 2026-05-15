@@ -24,14 +24,16 @@ create table if not exists vacancies (
   raw_date              text,
   scraped_at            timestamptz   not null default now(),
 
-  -- Status machine: new → enriching → enriched → lead_created → contacted → converted | rejected
+  -- Status machine: new → filtered | enriching → enriched → lead_created → contacted → converted | rejected
   status                text          not null default 'new'
                           check (status in (
-                            'new', 'enriching', 'enriched',
+                            'new', 'filtered', 'enriching', 'enriched',
                             'lead_created', 'crm_duplicate',
                             'contacted', 'converted', 'rejected'
                           )),
+  filter_reason         text,
   status_new_at         timestamptz,
+  status_filtered_at    timestamptz,
   status_enriching_at   timestamptz,
   status_enriched_at    timestamptz,
   status_lead_created_at timestamptz,

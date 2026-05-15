@@ -1,8 +1,11 @@
 'use strict';
 
 /**
- * Search terms configuration for Indeed.nl scraper.
- * Add new sectors or terms here — the scraper picks them up automatically.
+ * Search terms per sector. Add new sectors or terms here — the scraper
+ * picks them up automatically on the next run.
+ *
+ * Removed: 'it' and 'backoffice' — these generate structurally wrong leads
+ * for a B2B technical recruitment marketing agency.
  */
 
 const SEARCH_TERMS = {
@@ -12,8 +15,16 @@ const SEARCH_TERMS = {
     'calculator bouw',
     'projectleider bouw',
     'uitvoerder installatietechniek',
-    'monteur',
     'constructeur',
+    'uitvoerder grondwerk',
+    'uitvoerder infra',
+    'projectleider gww',
+    'stratenmaker',
+    'dakdekker',
+    'steigerbouwer',
+    'betonvlechter',
+    'bekister',
+    'rioolmonteur',
   ],
   techniek: [
     'technisch beheerder',
@@ -21,35 +32,60 @@ const SEARCH_TERMS = {
     'onderhoudsmonteur',
     'technisch specialist',
     'mechatronicus',
+    'storingsmonteur',
+    'preventiemonteur',
+    'technisch projectleider',
+    'field service engineer',
+    'technisch inspecteur',
   ],
-  it: [
-    'IT beheerder',
-    'systeembeheerder',
-    'netwerkbeheerder',
-    'helpdesk medewerker',
-    'software developer',
+  metaalElektro: [
+    'bankwerker',
+    'cnc frezer',
+    'cnc draaier',
+    'lasser mig mag',
+    'constructielasser',
+    'pijpfitter',
+    'plaatwerker',
+    'operator productie',
+    'werktuigbouwkundig tekenaar',
+    'technisch tekenaar',
+    'constructeur werktuigbouw',
+    'elektromonteur',
+    'elektrotechnisch monteur',
+    'installateur elektra',
+    'storingsmonteur elektra',
+    'middenspanning monteur',
+    'hoogspanning monteur',
+    'werkvoorbereider elektro',
+    'projectleider elektro',
+    'kabellegger',
+    'instrumentatiemonteur',
+    'plc programmeur',
   ],
-  backoffice: [
-    'HR medewerker',
-    'office manager',
-    'management assistent',
-    'financieel administrateur',
+  spoorwegtechniek: [
+    'railmonteur',
+    'spoorwerker',
+    'bovenbouwmonteur',
+    'spooronderhoud',
+    'wissel monteur',
+    'railinspecteur',
+    'seinmonteur',
+    'spoortechnicus',
+    'tractietechnicus',
+    'bovenleidingmonteur',
+    'bovenleidingwerker',
+    'rijdraadmonteur',
+    'projectleider spoor',
+    'werkvoorbereider spoor',
+    'uitvoerder spoor',
+    'onderhoudsmonteur spoor',
   ],
 };
 
-/** Base URL for Indeed.nl job search */
 const INDEED_BASE_URL = 'https://nl.indeed.com/vacatures';
-
-/** Maximum age of vacancies to include (in hours) */
 const MAX_AGE_HOURS = 24;
-
-/** Delay between requests in milliseconds */
 const REQUEST_DELAY_MS = 2000;
-
-/** Maximum retries per failed request */
 const MAX_RETRIES = 3;
-
-/** Number of pages to scrape per search term (10 results/page) */
 const MAX_PAGES_PER_TERM = 3;
 
 module.exports = {

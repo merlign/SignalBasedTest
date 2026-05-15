@@ -7,9 +7,10 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "dev": "node api/cron.js",
+    "start": "node api/cron.js",
     "test:scraper": "node -e \"require('./src/scraper').runScraper().then(console.log).catch(console.error)\"",
-    "test:single": "node -e \"require('./src/scraper').scrapeTerm('uitvoerder', 'bouw').then(console.log).catch(console.error)\""
+    "test:single": "node -e \"require('./src/scraper').scrapeTerm('uitvoerder', 'bouw').then(console.log).catch(console.error)\"",
+    "test:filter": "node -e \"const {filterVacancies}=require('./src/filter');const v=[{id:'1',title:'Uitvoerder Bouw',company:'Randstad Uitzendbureau',snippet:'',sector:'bouw'},{id:'2',title:'Uitvoerder Bouw',company:'Van Baaren Aannemers',snippet:'',sector:'bouw'}];console.log(JSON.stringify(filterVacancies(v),null,2))\""
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",

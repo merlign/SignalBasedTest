@@ -212,4 +212,48 @@ async function updateLeadStatus(simplicateLeadId, statusId) {
   }
 }
 
-module.exports = { processEnrichedLeads, updateLeadStatus };
+/**
+ * Create a follow-up task in Simplicate linked to a lead.
+ * This triggers a notification in Simplicate for the assigned employee.
+ */
+async function createFollowUpTask(leadId, vacancy, scoreInfo) {
+  if (!leadId) return;
+
+  const assigneeId = process.env.SIMPLICATE_ASSIGNEE_ID;
+  if (!assigneeId) {
+    log.warn('SIMPLICATE_ASSIGNEE_ID not set — skipping task creation');
+    return;
+  }
+
+  const dueDate = new Date();
+  dueDate.setDate(dueDate.getDate() + 1); // follow up tomorrow
+
+  const taskPayload = {
+    subject: `🔥 Ultieme lead: ${vacancy.company_name}`,
+    note: [
+      `Bedrijf heeft ${scoreInfo.openVacancies}+ vacatures open in de afgelopen 30 dagen.`,
+      `Sector: ${vacancy.sector}`,
+      `Laatste vacature: "${vacancy.title}"`,
+      `Locatie: ${vacancy.location || 'onbekend'}`,
+      scoreInfo.employees ? `Medewerkers: ~${scoreInfo.employees}` : '',
+      `Vacature URL: ${vacancy.url}`,
+      vacancy.contact_name ? `Contactpersoon: ${vacancy.contact_name}` : '',
+      vacancy.contact_email ? `E-mail: ${vacancy.contact_email}` : '',
+      vacancy.linkedin_url ? `LinkedIn: ${vacancy.linkedin_url}` : '',
+    ].filter(Boolean).join('\n'),
+    linked_to: [{ type: 'sales_lead', id: leadId }],
+    assigned_to_id: assigneeId,
+    due_at: dueDate.toISOString(),
+    status: 'open',
+  };
+
+  try {
+    const { data } = await simplicateHttp.post('/tasks/task', taskPayload);
+    log.info(`Follow-up task created in Simplicate: ${data.data?.id} for lead ${leadId}`);
+    return data.data?.id;
+  } catch (err) {
+    log.warn(`Could not create follow-up task for lead ${leadId}`, { error: err.message });
+  }
+}
+
+module.exports = { processEnrichedLeads, updateLeadStatus, createFollowUpTask };

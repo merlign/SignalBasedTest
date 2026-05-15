@@ -209,12 +209,20 @@ function filterVacancy(vacancy) {
     return { keep: false, reason: `title_hard_reject: ${title}` };
   }
 
-  // 4. Company blacklist — but positive title overrides it
+  // 4. Company blacklist
+  // Uitzendbureaus/recruitment zijn ALTIJD een hard reject — zij plaatsen mensen
+  // bij anderen en zijn nooit zelf de klant, ongeacht de functietitel.
+  const HARD_REJECT_CATEGORIES = ['recruitment/uitzend'];
+
   const blacklistCategory = isCompanyBlacklisted(company);
   if (blacklistCategory) {
+    if (HARD_REJECT_CATEGORIES.includes(blacklistCategory)) {
+      return { keep: false, reason: `company_blacklisted_hard: ${blacklistCategory}` };
+    }
+    // Voor andere categorieën: positieve functietitel mag wel overriden
+    // (bijv. IT-bedrijf dat een elektromonteur zoekt)
     if (isTitlePositive(title)) {
-      // Technical role at a blacklisted company (e.g. IT bedrijf hiring elektromonteur)
-      return { keep: true, reason: `company_blacklisted_but_title_positive` };
+      return { keep: true, reason: 'company_blacklisted_but_title_positive' };
     }
     return { keep: false, reason: `company_blacklisted: ${blacklistCategory}` };
   }

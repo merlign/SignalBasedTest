@@ -119,6 +119,24 @@ function buildUrl(term, page = 0) {
 }
 
 /**
+ * Extract job listings from the JSON blob Indeed embeds in the page.
+ * Indeed stores all job data in window.mosaic.providerData as a JSON string
+ * inside a <script> tag — much more reliable than scraping HTML selectors.
+ */
+function extractJobsFromJson(html) {
+  // Indeed embeds job data in a script tag as: mosaic.providerData["mosaic-provider-jobcards"]={"metaData":...}
+  const match = html.match(/mosaic\.providerData\["mosaic-provider-jobcards"\]\s*=\s*(\{.*?\});\s*(?:window|mosaic)/s);
+  if (!match) return null;
+
+  try {
+    const json = JSON.parse(match[1]);
+    return json?.metaData?.mosaicProviderJobCardsModel?.results || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Fetch and parse a single Indeed results page.
  * Returns an array of raw vacancy objects.
  */
@@ -130,10 +148,57 @@ async function fetchPage(term, sector, page) {
     headers: { 'User-Agent': nextUserAgent() },
   });
 
-  const $ = cheerio.load(response.data);
+  const html = response.data;
   const vacancies = [];
 
-  // Indeed wraps each job card in a <div> with data-jk attribute
+  // ── Try JSON extraction first (preferred) ──────────────────────────────
+  const jobs = extractJobsFromJson(html);
+
+  if (jobs && jobs.length > 0) {
+    log.debug(`JSON extraction found ${jobs.length} jobs for "${term}"`);
+    for (const job of jobs) {
+      try {
+        const jobKey = job.jobkey;
+        const title = job.title || job.normTitle;
+        const company = job.company;
+        const location = job.formattedLocation || job.jobLocationCity;
+        const rawDate = job.formattedRelativeTime || job.pubDate || '';
+        const snippet = job.snippet || job.truncatedBody || '';
+
+        if (!jobKey || !title || !company) continue;
+
+        const postedAt = parseIndeedDate(rawDate);
+        if (!postedAt) {
+          log.debug(`Skipping old vacancy: "${title}" at ${company}`, { rawDate });
+          continue;
+        }
+
+        vacancies.push({
+          id: `indeed_${jobKey}`,
+          source: 'indeed.nl',
+          url: `https://nl.indeed.com/rc/clk?jk=${jobKey}`,
+          title,
+          company,
+          location: location || '',
+          sector,
+          searchTerm: term,
+          snippet,
+          postedAt: postedAt.toISOString(),
+          rawDate,
+          scrapedAt: new Date().toISOString(),
+          status: 'new',
+        });
+      } catch (parseErr) {
+        log.warn('Error parsing JSON job entry', { error: parseErr.message });
+      }
+    }
+    return vacancies;
+  }
+
+  // ── Fallback: parse HTML with cheerio ──────────────────────────────────
+  log.debug(`JSON extraction failed for "${term}", falling back to HTML parsing`);
+  const $ = cheerio.load(html);
+
   $('[data-jk]').each((_, el) => {
     try {
       const card = $(el);

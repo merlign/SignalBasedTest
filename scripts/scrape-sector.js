@@ -3,6 +3,7 @@
 require('dotenv').config();
 const { scrapeTerm } = require('../src/scraper');
 const { filterVacancies } = require('../src/filter');
+const { filterNew, saveVacancies } = require('../src/deduplication');
 const { SEARCH_TERMS } = require('../config/searchterms');
 
 const sector = process.argv[2];
@@ -43,7 +44,11 @@ async function run() {
     });
   }
 
-  console.log('');
+  // Dedupliceren en opslaan in Supabase
+  console.log(`\nOpslaan in Supabase...`);
+  const { newVacancies, duplicateCount } = await filterNew(kept);
+  const saved = await saveVacancies(newVacancies);
+  console.log(`✓ ${saved.length} nieuw opgeslagen, ${duplicateCount} al bekend\n`);
 }
 
 run().catch((err) => {

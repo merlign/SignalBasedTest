@@ -210,18 +210,13 @@ function filterVacancy(vacancy) {
   }
 
   // 4. Company blacklist
-  // Uitzendbureaus/recruitment zijn ALTIJD een hard reject — zij plaatsen mensen
-  // bij anderen en zijn nooit zelf de klant, ongeacht de functietitel.
-  const HARD_REJECT_CATEGORIES = ['recruitment/uitzend'];
-
+  // Technische uitzendbureaus/ingenieursbureaus (zoals Alpha Pro, Brunel technisch)
+  // zijn wel degelijk goede leads — zij recruitten technisch personeel en kopen
+  // recruitment campagnes. Alleen als de functietitel ook irrelevant is, filteren.
   const blacklistCategory = isCompanyBlacklisted(company);
   if (blacklistCategory) {
-    if (HARD_REJECT_CATEGORIES.includes(blacklistCategory)) {
-      return { keep: false, reason: `company_blacklisted_hard: ${blacklistCategory}` };
-    }
-    // Voor andere categorieën: positieve functietitel mag wel overriden
-    // (bijv. IT-bedrijf dat een elektromonteur zoekt)
     if (isTitlePositive(title)) {
+      // Technische vacature bij een (uitzend)bureau → bewaren
       return { keep: true, reason: 'company_blacklisted_but_title_positive' };
     }
     return { keep: false, reason: `company_blacklisted: ${blacklistCategory}` };

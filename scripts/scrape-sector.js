@@ -24,7 +24,10 @@ async function run() {
     all.push(...results);
   }
 
-  const { kept, filtered } = filterVacancies(all);
+  // Zelfde vacature kan via meerdere zoektermen gevonden worden — dedup op ID
+  const unique = [...new Map(all.map((v) => [v.id, v])).values()];
+
+  const { kept, filtered } = filterVacancies(unique);
 
   console.log(`\n${'─'.repeat(50)}`);
   console.log(`Sector:         ${sector}`);

@@ -1,0 +1,26 @@
+{
+  "name": "vacancy-monitoring-system",
+  "version": "1.0.0",
+  "description": "Automated vacancy monitoring system that scrapes Indeed.nl and creates leads in Simplicate",
+  "main": "api/cron.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "dev": "node api/cron.js",
+    "test:scraper": "node -e \"require('./src/scraper').runScraper().then(console.log).catch(console.error)\"",
+    "test:single": "node -e \"require('./src/scraper').scrapeTerm('uitvoerder', 'bouw').then(console.log).catch(console.error)\""
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "axios": "^1.6.5",
+    "axios-retry": "^4.0.0",
+    "cheerio": "^1.0.0-rc.12",
+    "node-cron": "^3.0.3",
+    "p-limit": "^5.0.0",
+    "validator": "^13.11.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.3.1"
+  }
+}
